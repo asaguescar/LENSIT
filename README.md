@@ -1,1 +1,2 @@
-# glsne_lcs_codes
+# LENSIT: Lensing End-to-end Supernovae Lightcurve Investigation Tool
+

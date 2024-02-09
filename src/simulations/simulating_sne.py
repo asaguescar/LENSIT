@@ -92,3 +92,67 @@ def glsneia_salt2_sample(out, cosmo, doPlot=False):
     out_ia_salt2['MB_unlensed_app'] = cosmo.distmod(out_ia_salt2['z']).value + out_ia_salt2['MB']
 
     return out_ia_salt2
+
+
+
+def glsneia_hsiao_sample(out, cosmo, doPlot=False, mabs=-19.3, sigmaint=0.10):
+    z = out['z']
+    size = len(z)
+
+    MB = np.random.normal(loc=mabs, scale=sigmaint, size=len(z))
+
+    mb_app_unlensed = cosmo.distmod(z).value + MB
+    template = sncosmo.Model('hsiao')
+    m_current = template.source_peakmag("bessellb", "vega")
+    amp = 10. ** (0.4 * (m_current - mb_app_unlensed)) * template.get("amplitude")
+    #x0 = 10. ** (0.4 * (MB - mb_app_unlensed))
+
+    hostr_v, hostebv = hostdust_Ia(size=size)
+
+    # Now we add sky coordinates and dust extinction. We assume uniform in ra-dec
+    ra, dec = utils.random_radec(ra_range=[0, 360], dec_range=[-30, 90], size=size)
+
+    mw_sfdmap = sfdmap.SFDMap(mapdir='../input/sfddata-master')
+    MWebv = mw_sfdmap.ebv(ra, dec)
+
+    if doPlot:
+        plt.figure()
+        plt.hist(MB, density=True, bins=20)
+        plt.xlabel('MB')
+        plt.show()
+
+        plt.figure()
+        plt.hist(amp, density=True, bins=20)
+        plt.xlabel('x0')
+        plt.show()
+
+        plt.figure()
+        plt.hist(hostebv, density=True, bins=20)
+        plt.xlabel('hostebv')
+        plt.show()
+
+        plt.figure()
+        plt.hist(hostr_v, density=True, bins=20)
+        plt.xlabel('hostr_v')
+        plt.show()
+
+        plt.figure()
+        plt.scatter(ra, dec, c=MWebv)
+        plt.colorbar(label='MWebv')
+        plt.ylabel('Dec')
+        plt.xlabel('Ra')
+        plt.show()
+
+    out_ = out.copy()
+    out_['MB'] = MB
+    out_['amplitude'] = amp
+    out_['hostr_v'] = hostr_v
+    out_['hostebv'] = hostebv
+    out_['ra'] = ra
+    out_['dec'] = dec
+    out_['MWebv'] = MWebv
+    out_['MB_lensed'] = out_['MB'] - (2.5 * np.log10(out_['mu_total']))
+    out_['MB_lensed_app'] = cosmo.distmod(out_['z']).value + out_['MB_lensed']
+    out_['MB_unlensed_app'] = cosmo.distmod(out_['z']).value + out_['MB']
+
+    return out_

@@ -34,20 +34,23 @@ lc_params['zlens_phzerr'], lc_params['phzerr'] = add_photoz_error(dset_['targets
 # We know from the input simulation. t0! :)
 # we want to know the apparent magnitude in g,r and i at t0.
 
-from analysis.lcs_parameters import modelpeak
+from analysis.lcs_parameters import time_modelpeak
 import numpy as np
 
-lc_params['t_peak'] = dset_['targets'].t0
+lc_params['t_peak'] = np.ones(len(dset_['targets'])) * np.nan
 lc_params['g_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 lc_params['r_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 lc_params['i_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 for ind in dset_['targets'].index:
     mod = GLSNeIa_salt2._TEMPLATE
-    mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
-       'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]
+    try:
+        mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
+                                             'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]
+    except:
+        mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
+                                             'dt_4', 'amplitude', 'hostr_v', 'hostebv', 'MWebv', 't0']]
     mod.set(**mod_par)
-    lc_params['g_modelpeak'].loc[ind], lc_params['r_modelpeak'].loc[ind], lc_params['i_modelpeak'].loc[ind]= modelpeak(mod, mod_par.t0)
-
+    lc_params['t_peak'].loc[ind], lc_params['g_modelpeak'].loc[ind], lc_params['r_modelpeak'].loc[ind], lc_params['i_modelpeak'].loc[ind]= time_modelpeak(mod)
 
 
 # To get colors and peak from the lcs lets share tools with lsst analysis
@@ -63,8 +66,12 @@ lc_params['g-i_mod']      = lc_params['g-i_mod'].astype(object)
 lc_params['r-i_mod']      = lc_params['r-i_mod'].astype(object)
 for ind in dset_['targets'].index:
     mod = GLSNeIa_salt2._TEMPLATE
-    mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
-       'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]
+    try:
+        mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
+                                             'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]
+    except:
+        mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
+                                             'dt_4', 'amplitude', 'hostr_v', 'hostebv', 'MWebv', 't0']]
     mod.set(**mod_par)
     lc_params['t_color_obs'].loc[ind], lc_params['g-r_mod'].loc[ind], lc_params['g-i_mod'].loc[ind], lc_params['r-i_mod'].loc[ind]= color_model(mod, lc_params['t_peak'].loc[ind])
 

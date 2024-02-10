@@ -6,6 +6,23 @@ def add_photoz_error(zl, rel_err=0.15):
     return zl_phzerr, phzerr
 
 
+def time_modelpeak(mod):
+    '''
+    adding in targets file time of peak and the magnitudes at the true peak extracted from the model
+    '''
+    wave = np.linspace(mod.minwave(), mod.maxwave(), 100)
+    i, j = mod.mintime(), mod.maxtime()
+    n = int(j - i)
+    time = np.linspace(i, j, n)
+
+    t_peak = time[np.argmax(np.max(mod.flux(time, wave), axis=1))]
+    g_truepeak = mod.bandmag('ztfg', 'ab', t_peak)
+    r_truepeak = mod.bandmag('ztfr', 'ab', t_peak)
+    i_truepeak = mod.bandmag('ztfi', 'ab', t_peak)
+
+    return t_peak, g_truepeak, r_truepeak, i_truepeak
+
+
 def modelpeak(mod, t_peak):
     '''
     adding in targets file time of peak and the magnitudes at the true peak extracted from the model

@@ -3,6 +3,7 @@ def parse_commands():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--dset', default='../sim_output/dset_ia_salt2_10000_0.pkl', type=str, help='dset_file')
+    parser.add_argument('-s', '--sntype', default='salt2', type=str, help='salt2/hsiao/iip/iin/ibc')
 
     return parser.parse_args()
 
@@ -14,7 +15,22 @@ dset_file = args.dset
 import warnings
 warnings.filterwarnings('ignore')
 
-from simulations.glsne_target import GLSNeIa_salt2
+
+if args.sntype == 'salt2':
+    from simulations.glsne_target import GLSNeIa_salt2
+    mod = GLSNeIa_salt2._TEMPLATE
+elif args.sntype == 'hsiao':
+    from simulations.glsne_target import GLSNeIa_hsiao
+    mod = GLSNeIa_hsiao._TEMPLATE
+elif args.sntype == 'iip':
+    from simulations.glsne_target import GLSNe_sn2p_2005lc
+    mod = GLSNe_sn2p_2005lc._TEMPLATE
+elif args.sntype == 'iin':
+    from simulations.glsne_target import GLSNe_sn2n
+    mod = GLSNe_sn2n._TEMPLATE
+elif args.sntype == 'ibc':
+    from simulations.glsne_target import GLSNe_sn1bc
+    mod = GLSNe_sn1bc._TEMPLATE
 
 import pandas as pd
 dset_ = pd.read_pickle(dset_file)
@@ -42,7 +58,6 @@ lc_params['g_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 lc_params['r_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 lc_params['i_modelpeak'] = np.ones(len(dset_['targets'])) * np.nan
 for ind in dset_['targets'].index:
-    mod = GLSNeIa_salt2._TEMPLATE
     try:
         mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
                                              'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]
@@ -65,7 +80,6 @@ lc_params['g-r_mod']      = lc_params['g-r_mod'].astype(object)
 lc_params['g-i_mod']      = lc_params['g-i_mod'].astype(object)
 lc_params['r-i_mod']      = lc_params['r-i_mod'].astype(object)
 for ind in dset_['targets'].index:
-    mod = GLSNeIa_salt2._TEMPLATE
     try:
         mod_par = dset_['targets'].loc[ind][['z', 'mu_1', 'mu_2', 'mu_3', 'mu_4', 'dt_1', 'dt_2', 'dt_3',
                                              'dt_4', 'x1', 'c', 'x0', 'hostr_v', 'hostebv', 'MWebv', 't0']]

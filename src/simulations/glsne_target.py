@@ -141,7 +141,7 @@ class GLSNe_sn2p_2005lc( target.core.Transient ):
     _KIND = "GLSNIIP"
     sntemplate = "s11-2005lc"
     source = GLSNe(sntemplate, 4)
-    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['mw', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
+    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MW', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
     
     _RATE = staticmethod(rate_glCC)
     
@@ -190,7 +190,7 @@ class GLSNe_sn2n( target.core.Transient ):
     _KIND = "GLSNIIn"
     sntemplate = "nugent-sn2n"
     source = GLSNe(sntemplate, 4)
-    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['mw', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
+    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MW', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
     
     _RATE = staticmethod(rate_glCC)
     
@@ -272,7 +272,7 @@ class GLSNeIa_hsiao( target.core.Transient ):
     _KIND = "GLSNIa"
     sntemplate = "hsiao"
     source = GLSNe(sntemplate, 4)
-    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['mw', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
+    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MW', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
     
     _RATE = staticmethod(rate_glIa)
     
@@ -315,7 +315,7 @@ class GLSNe_sn1bc( target.core.Transient ):
     _KIND = "GLSNIbc"
     sntemplate = "nugent-sn1bc"
     source = GLSNe(sntemplate, 4)
-    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['mw', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
+    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MW', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
     
     _RATE = staticmethod(rate_glCC)
     

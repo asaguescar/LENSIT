@@ -315,7 +315,7 @@ class GLSNe_sn1bc( target.core.Transient ):
     _KIND = "GLSNIbc"
     sntemplate = "nugent-sn1bc"
     source = GLSNe(sntemplate, 4)
-    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MW', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
+    _TEMPLATE = sncosmo.Model(source, effects=[dust, dust, dust], effect_names=['MWg', 'host', 'lens'], effect_frames=['obs', 'rest', 'free'])
     
     _RATE = staticmethod(rate_glCC)
     

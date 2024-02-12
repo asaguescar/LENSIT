@@ -283,7 +283,7 @@ def glsneiin_sample(out, cosmo, doPlot=False, mabs=-19.05, sigmaint=0.5):
 
 
 
-def glsneibc_sample(out, cosmo, doPlot=False, mabs=-19.05, sigmaint=0.5):
+def glsneibc_sample(out, cosmo, doPlot=False, mabs=-17.51, sigmaint=0.74):
     z = out['z']
     size = len(z)
 

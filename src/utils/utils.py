@@ -13,15 +13,18 @@ def combine_target_and_lcparams(globinput = '../sim_output/dset_ia_salt2_10000_?
     dsetfiles = glob.glob(globinput)
     dsets = []
     for dset_ in dsetfiles:
-        df_ = pd.read_pickle(dset_)
-        lcpar_ = pd.read_pickle(dset_[:-4]+'_lcparams.pkl')
         try:
-            fitpar_ = pd.read_pickle(dset_[:-4]+'_fittedparams.pkl')
-            dfcomb_ = pd.concat([df_['targets'], lcpar_, fitpar_], axis=1)
+            df_ = pd.read_pickle(dset_)
+            lcpar_ = pd.read_pickle(dset_[:-4]+'_lcparams.pkl')
+            try:
+                fitpar_ = pd.read_pickle(dset_[:-4]+'_fittedparams.pkl')
+                dfcomb_ = pd.concat([df_['targets'], lcpar_, fitpar_], axis=1)
+            except:
+                dfcomb_ = pd.concat([df_['targets'], lcpar_], axis=1)
+            dfcomb_ = dfcomb_.loc[:, ~dfcomb_.columns.duplicated()] # to eliminate duplicated columns
+            dsets.append(dfcomb_)
         except:
-            dfcomb_ = pd.concat([df_['targets'], lcpar_], axis=1)
-        dfcomb_ = dfcomb_.loc[:, ~dfcomb_.columns.duplicated()] # to eliminate duplicated columns
-        dsets.append(dfcomb_)
+            continue
     return pd.concat(dsets, ignore_index=True)
 
 def event_rate(z, Rloc=3e4, az=1):

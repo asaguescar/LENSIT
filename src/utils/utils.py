@@ -10,5 +10,5 @@ def combine_target_and_lcparams(globinput = '../sim_output/dset_ia_salt2_10000_?
         lcpar_ = pd.read_pickle(dset_[:-4]+'_lcparams.pkl')
         dfcomb_ = pd.concat([df_['targets'], lcpar_], axis=1)
         dfcomb_ = dfcomb_.loc[:, ~dfcomb_.columns.duplicated()] # to eliminate duplicated columns
-        dsets.append(dfcomb_[dfcomb_.ndet>=5])
+        dsets.append(dfcomb_)
     return pd.concat(dsets, ignore_index=True)

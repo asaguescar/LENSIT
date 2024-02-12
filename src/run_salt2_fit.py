@@ -55,8 +55,7 @@ if os.path.isfile(dset_file[:-4]+'_fittedparams.pkl')==False:
         lc['snr'] = lc.flux / lc.fluxerr
         low_snr_indeces = lc[lc.snr < 5].index
         lc.drop(index=low_snr_indeces, inplace=True)
-        mwebv = dset_['targets'].loc[
-            ind].MWebv  # , dset.targets.data.loc[ind].zlens, dset.targets.data.loc[ind].zlens_phzerr
+        mwebv = dset_['targets'].loc[ind].MWebv  # , dset.targets.data.loc[ind].zlens, dset.targets.data.loc[ind].zlens_phzerr
         zlens = dset_['targets'].loc[ind].z_l
         zlens_phzerr = lcpar.loc[ind].zlens_phzerr
 

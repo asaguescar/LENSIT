@@ -325,7 +325,7 @@ class GLSNe_sn1bc( target.core.Transient ):
                   mu_total={"func": random_mutotal, "kwargs":{"z":"@z"}},
                   inmodt={"func": inmo_dt_dist, "kwargs":{"z":"@z", "zlens":"@zlens", "mu_total":"@mu_total", "df":df},
                           "as":["imno", "dt_max"]}, # We use Danny's catlog to distribute the time delays and multiplicity.  
-                  dts={"func": dts_dist,  "kwargs":{"imno":"@imno", "dt_max":"@dt_max"}s,
+                  dts={"func": dts_dist,  "kwargs":{"imno":"@imno", "dt_max":"@dt_max"},
                        "as": ["dt_1", "dt_2", "dt_3", "dt_4"]}, # Now we want to get the individual time delays. 
                   mus={"func": mus_dist,  "kwargs":{"imno":"@imno", "mu_total":"@mu_total"}, 
                        "as": ["mu_1", "mu_2", "mu_3", "mu_4"]}, # Now we want to get the individual time delays. 

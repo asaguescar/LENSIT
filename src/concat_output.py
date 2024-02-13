@@ -1,5 +1,4 @@
 from utils.utils import combine_target_and_lcparams
-import pandas as pd
 import numpy as np
 
 from utils.utils import add_weight_fromuniformz
@@ -8,15 +7,6 @@ from utils.utils import add_weight_fromuniformz
 
 zmax = 1.5
 fraction_sky = .75
-
-# Ia
-salt2 = pd.read_pickle('../sim_output/dset_ia_salt2_targlcpar.pkl')
-salt2['ndet_aroundpeak'] = salt2['g_npoints_aroundpeak']+salt2['r_npoints_aroundpeak']+salt2['i_npoints_aroundpeak']
-salt2['dmag'] = 2.5*np.log10(salt2.mu_total)
-Rloc = 2.35e4
-alpha= 1.5
-salt2['weight'] = add_weight_fromuniformz(salt2.z, zmax=zmax, Rloc = Rloc, alpha= alpha, fraction_sky=fraction_sky)
-
 
 # Combine targets lcparams for salt2
 df = combine_target_and_lcparams(globinput = '../sim_output/dset_ia_salt2_?0000_?.pkl')

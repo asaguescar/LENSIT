@@ -1,10 +1,21 @@
 # Run The LENSIT pipeline to get the detected lightcurves
 
+def parse_commands():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-z', '--zmax', default=1.5, type=float, help='max redshift')
+    parser.add_argument('-s', '--size', default=100, type=int, help='size')
+    parser.add_argument('-i', '--index', default=0, type=int, help='index')
+
+    return parser.parse_args()
+
+args = parse_commands()
 ##############################
 # Set up the sims:
-z_max = 1.5
-size  = 10
-i = 0
+z_max = args.zmax
+size  = args.size
+i     = args.index
 ##############################
 
 from simulations.simulating_lenses import sample_object_parameters

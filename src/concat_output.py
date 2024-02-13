@@ -1,7 +1,6 @@
-from utils.utils import combine_target_and_lcparams
+from utils.utils import combine_target_and_lcparams, combine_targets, add_weight_fromuniformz
 import numpy as np
 
-from utils.utils import add_weight_fromuniformz
 
 # and add weights
 

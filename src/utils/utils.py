@@ -9,6 +9,14 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
+def combine_targets(globinput = '../sim_output/dset_ia_salt2_10000_?.pkl'):
+    dsetfiles = glob.glob(globinput)
+    dsets = []
+    for dset_ in dsetfiles:
+        df_ = pd.read_pickle(dset_)
+        dsets.append(df_['targets'])
+    return pd.concat(dsets, ignore_index=True)
+
 def combine_target_and_lcparams(globinput = '../sim_output/dset_ia_salt2_10000_?.pkl'):
     dsetfiles = glob.glob(globinput)
     dsets = []

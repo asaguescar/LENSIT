@@ -24,9 +24,9 @@ import sncosmo
 
 KIND = 'SN II'
 templates = get_sncosmo_sourcenames(KIND, startswith="v19", endswith="corr")  # all -corr models
-for i in range(len(templates)):
-    print(templates[i], '>> gl-' + templates[i])
-    source = GLSNe(templates[i], name='gl-' + templates[i])
+for it_ in range(len(templates)):
+    print(templates[it_], '>> gl-' + templates[it_])
+    source = GLSNe(templates[it_], name='gl-' + templates[it_])
     sncosmo.registry.register(source, force=True)
 
 from simulations.simulating_lenses import sample_object_parameters
@@ -101,6 +101,6 @@ if not isExist:
    os.makedirs(path)
    print("The new directory is created! ", path)
 
-outputfilename = path+'dset_ii_v19_'+str(size)+'_'+str(i)+'.pkl'
+outputfilename = path+'dset_ii_v19_'+str(size)+'_'+str(args.index)+'.pkl'
 pickle.dump(dset_, open(outputfilename, 'wb'))
 print('Saved: ', outputfilename)

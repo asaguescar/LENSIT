@@ -356,15 +356,21 @@ def glsneii_sample(out, cosmo, doPlot=False, mabs=-16.0, sigmaint=1.3):
 
     templates = get_sncosmo_sourcenames('SN II', startswith="v19", endswith="corr")  # all -corr models
     templates = ['gl-' + t for t in templates]
-    template = random.choices(templates, k=size)
+    template = np.array(random.choices(templates, k=size))
 
     amp = np.ones(size)
+    print(np.unique(template))
     for t in np.unique(template):
+        print(np.where(template == t))
         ind = np.where(template == t)
         model = sncosmo.Model(t)
         m_current = model.source_peakmag("bessellb", "vega")
-        amp[ind] = 10. ** (0.4 * (m_current - magobs[ind])) * model.get("amplitude")
+        print(t, ind, m_current, magobs[ind], model.get("amplitude"))
+        print(amp[ind])
+        print(10. ** (0.4 * (m_current - magobs[ind])) * model.get("amplitude"))
 
+        amp[ind] = 10. ** (0.4 * (m_current - magobs[ind])) * model.get("amplitude")
+    print(amp)
     hostr_v, hostebv = hostdust_Ia(size=size)
 
     # Now we add sky coordinates and dust extinction. We assume uniform in ra-dec

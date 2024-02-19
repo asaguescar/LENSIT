@@ -360,3 +360,29 @@ class GLSNe_sn1bc( target.core.Transient ):
         return 10.**(0.4 * (m_current - mapp_unlensed)) * template.get("amplitude")
 
 
+
+# SKYSURVEY BUILT-IN CC
+from skysurvey import SNeII
+from skysurvey.source import get_sncosmo_sourcenames
+
+class GLSNeII(SNeII):
+    _KIND = "SN II"
+
+    templates = get_sncosmo_sourcenames(_KIND, startswith="v19", endswith="corr")  # all -corr models
+    for i in range(len(templates)):
+        print(templates[i], '>> gl-' + templates[i])
+        source = GLSNe(templates[i], name='gl-' + templates[i])
+        sncosmo.registry.register(source, force=True)
+
+    # change the absolute magnitude parameters
+    # This is from (Perley 2020)
+
+    _MAGABS = (-16.0, 1.3)  # Table 1 of Vincenzi19
+    _MODEL = dict(redshift={"func": np.random.uniform,
+                            "kwargs": {"low": 0.1, "high": 1.5},
+                            "as": "z"},
+                  t0={"func": np.random.uniform,
+                      "kwargs": {"low": 0, "high": 1000}},
+                  magabs_intrinsic={"func": np.random.normal,
+                                    "kwargs": {"loc": _MAGABS[0], "sigmaint": _MAGABS[1]}})
+

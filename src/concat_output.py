@@ -17,7 +17,6 @@ df['weight'] = add_weight_fromuniformz(df.z, zmax=zmax, Rloc = Rloc, alpha= alph
 df.to_pickle('../sim_output/dset_ia_salt2_targlcpar.pkl')
 
 df = combine_targets(globinput = '../sim_output/dset_ia_salt2_?0000_?.pkl')
-df['ndet_aroundpeak'] = df['g_npoints_aroundpeak']+df['r_npoints_aroundpeak']+df['i_npoints_aroundpeak']
 df['dmag'] = 2.5*np.log10(df.mu_total)
 Rloc = 2.35e4
 alpha= 1.5
@@ -34,7 +33,6 @@ df['weight'] = add_weight_fromuniformz(df.z, zmax=zmax, Rloc = Rloc, alpha= alph
 df.to_pickle('../sim_output/dset_ia_hsiao_targlcpar.pkl')
 
 df = combine_targets(globinput = '../sim_output/dset_ia_hsiao_?0000_?.pkl')
-df['ndet_aroundpeak'] = df['g_npoints_aroundpeak']+df['r_npoints_aroundpeak']+df['i_npoints_aroundpeak']
 df['dmag'] = 2.5*np.log10(df.mu_total)
 Rloc = 2.35e4
 alpha= 1.5
@@ -51,7 +49,6 @@ df['weight'] = add_weight_fromuniformz(df.z, zmax=zmax, Rloc = Rloc, alpha= alph
 df.to_pickle('../sim_output/dset_iip_targlcpar.pkl')
 
 df = combine_targets(globinput = '../sim_output/dset_iip_?0000_?.pkl')
-df['ndet_aroundpeak'] = df['g_npoints_aroundpeak']+df['r_npoints_aroundpeak']+df['i_npoints_aroundpeak']
 df['dmag'] = 2.5*np.log10(df.mu_total)
 Rloc = 5.52e4
 alpha= 2.
@@ -68,7 +65,6 @@ df['weight'] = add_weight_fromuniformz(df.z, zmax=zmax, Rloc = Rloc, alpha= alph
 df.to_pickle('../sim_output/dset_iin_targlcpar.pkl')
 
 df = combine_targets(globinput = '../sim_output/dset_iin_?0000_?.pkl')
-df['ndet_aroundpeak'] = df['g_npoints_aroundpeak']+df['r_npoints_aroundpeak']+df['i_npoints_aroundpeak']
 df['dmag'] = 2.5*np.log10(df.mu_total)
 Rloc = 5.05e3
 alpha= 2.
@@ -85,7 +81,6 @@ df['weight'] = add_weight_fromuniformz(df.z, zmax=zmax, Rloc = Rloc, alpha= alph
 df.to_pickle('../sim_output/dset_ibc_targlcpar.pkl')
 
 df = combine_targets(globinput = '../sim_output/dset_ibc_?0000_?.pkl')
-df['ndet_aroundpeak'] = df['g_npoints_aroundpeak']+df['r_npoints_aroundpeak']+df['i_npoints_aroundpeak']
 df['dmag'] = 2.5*np.log10(df.mu_total)
 Rloc = 3.33e4
 alpha= 2.

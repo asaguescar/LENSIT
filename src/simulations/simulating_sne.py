@@ -343,3 +343,75 @@ def glsneibc_sample(out, cosmo, doPlot=False, mabs=-17.51, sigmaint=0.74):
     out_['MB_unlensed_app'] = cosmo.distmod(out_['z']).value + out_['MB']
 
     return out_
+
+from skysurvey.source import get_sncosmo_sourcenames
+import random
+
+def glsneii_sample(out, cosmo, doPlot=False, mabs=-16.0, sigmaint=1.3):
+    z = out['z']
+    size = len(z)
+
+    magabs = np.random.normal(loc=mabs, scale=sigmaint, size=len(z))
+    magobs = cosmo.distmod(z).value + magabs
+
+    templates = get_sncosmo_sourcenames('SN II', startswith="v19", endswith="corr")  # all -corr models
+    templates = ['gl-' + t for t in templates]
+    template = random.choices(templates, k=size)
+
+    amp = np.ones(size)
+    for t in np.unique(template):
+        ind = np.where(template == t)
+        model = sncosmo.Model(t)
+        m_current = model.source_peakmag("bessellb", "vega")
+        amp[ind] = 10. ** (0.4 * (m_current - magobs[ind])) * model.get("amplitude")
+
+    hostr_v, hostebv = hostdust_Ia(size=size)
+
+    # Now we add sky coordinates and dust extinction. We assume uniform in ra-dec
+    ra, dec = utils.random_radec(ra_range=[0, 360], dec_range=[-30, 90], size=size)
+
+    mw_sfdmap = sfdmap.SFDMap(mapdir='../input/sfddata-master')
+    MWebv = mw_sfdmap.ebv(ra, dec)
+
+    if doPlot:
+        plt.figure()
+        plt.hist(MB, density=True, bins=20)
+        plt.xlabel('MB')
+        plt.show()
+
+        plt.figure()
+        plt.hist(amp, density=True, bins=20)
+        plt.xlabel('amplitude')
+        plt.show()
+
+        plt.figure()
+        plt.hist(hostebv, density=True, bins=20)
+        plt.xlabel('hostebv')
+        plt.show()
+
+        plt.figure()
+        plt.hist(hostr_v, density=True, bins=20)
+        plt.xlabel('hostr_v')
+        plt.show()
+
+        plt.figure()
+        plt.scatter(ra, dec, c=MWebv)
+        plt.colorbar(label='MWebv')
+        plt.ylabel('Dec')
+        plt.xlabel('Ra')
+        plt.show()
+
+    out_ = out.copy()
+    out_['MB'] = magabs
+    out_['amplitude'] = amp
+    out_['hostr_v'] = hostr_v
+    out_['hostebv'] = hostebv
+    out_['ra'] = ra
+    out_['dec'] = dec
+    out_['MWebv'] = MWebv
+    out_['MB_lensed'] = out_['MB'] - (2.5 * np.log10(out_['mu_total']))
+    out_['MB_lensed_app'] = cosmo.distmod(out_['z']).value + out_['MB_lensed']
+    out_['MB_unlensed_app'] = cosmo.distmod(out_['z']).value + out_['MB']
+    out_['template'] = template
+
+    return out_

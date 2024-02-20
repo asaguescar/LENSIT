@@ -1,6 +1,5 @@
 # I want to combine the params and the targets
 import glob
-import pandas as pd
 import numpy as np
 from astropy.cosmology import Planck18 as cosmo
 from scipy.interpolate import interp1d
@@ -61,7 +60,7 @@ def add_weight_fromuniformz(z, zmax=1.5, Rloc = 2.35e4, alpha= 1., fraction_sky=
     y_cor = np.diff(comoving_rate(x_cor, Rloc=Rloc, az=alpha))
     f_cor = interp1d(np.mean([x_cor[1:], x_cor[:-1]], axis=0), y_cor)
 
-    all_sky_rate = float(comoving_rate([zmax], Rloc=Rloc, az=alpha)) * fraction_sky
+    all_sky_rate = (float(comoving_rate([zmax], Rloc=Rloc, az=alpha)) -  float(comoving_rate([0.1], Rloc=Rloc, az=alpha)) )* fraction_sky
 
     weight =  f_cor(z)
     weight = weight/weight.sum() * all_sky_rate

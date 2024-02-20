@@ -62,7 +62,11 @@ def add_weight_fromuniformz(z, zmax=1.5, Rloc = 2.35e4, alpha= 1., fraction_sky=
 
     all_sky_rate = (float(comoving_rate([zmax], Rloc=Rloc, az=alpha)) -  float(comoving_rate([0.1], Rloc=Rloc, az=alpha)) )* fraction_sky
 
-    weight =  f_cor(z)
+    hist, bin_edges = np.histogram(z, bins=20)
+    bin_indices = np.digitize(z, bin_edges[:-1])  # Use digitize to get bin indices for each data point
+    weights_mapped_to_data = hist[bin_indices - 1]
+
+    weight = f_cor(z) / weights_mapped_to_data
     weight = weight/weight.sum() * all_sky_rate
     return weight
 

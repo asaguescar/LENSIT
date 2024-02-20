@@ -247,7 +247,7 @@ def check_lensing(z_lens, z_source, cosmo, theta_ein, gamma, source_x, source_y,
     return lensed, imno, x_image, y_image, mu_total, td_max, mu_1, mu_2, mu_3, mu_4, dt_1, dt_2, dt_3, dt_4
 
 
-def sample_object_parameters(z_max=1, cosmo=cosmo, size=None):
+def sample_lensing_parameters(z_max=1, cosmo=cosmo, size=None):
     # Sample redshift for strong lensing
     z_s_values = np.random.uniform(0.1, z_max, size=size)
     psl_values = psl(z_s_values)
@@ -257,54 +257,67 @@ def sample_object_parameters(z_max=1, cosmo=cosmo, size=None):
     # Sample redshift and probability for lensed redshift
     z_l_values, pzl_values = pzl(z_max, cosmo)
 
-    # Ensure z_l is always smaller than z_s
-    z_l = np.zeros(size)
-
-    for i in range(size):
-        while True:
-            # Sample z_l until it satisfies the condition
-            z_l[i] = np.random.choice(z_l_values, p=pzl_values / np.sum(pzl_values))
-            if z_l[i] < z_s[i]:
-                break
-
     # Sample parameters for velocity dispersion distribution
     sigma_values_, sigma_pdf = sigma_distr()
-    sigma_values = np.random.choice(sigma_values_, size=size, p=sigma_pdf / np.sum(sigma_pdf))
-
-    # Sample parameters for Einstein radius calculation
-    einstein_radius_values = einstein_radius(z_l, z_s, sigma_values)
-
-    # Sample parameters for ellipticity distribution
-    ellipticity_values = np.zeros(size)
-    for i in range(size):
-        ellipticity_values_, ellipticity_pdf = ellipticity_dispersion_dependent_distr(sigma_values[i])
-        ellipticity_values[i] = float(np.random.choice(ellipticity_values_, size=1, p=ellipticity_pdf))
 
     # Sample parameters for shear distribution
     shear_values_, shear_pdf = shear_distr()
-    shear_values = np.random.choice(shear_values_, size=size, p=shear_pdf)
 
-    # Sample supernova positions
-    source_x, source_y = supernova_positions(einstein_radius_values, size=size)
-
-    phi_lens = np.random.uniform(0, 2 * np.pi, size=size)
-    q_lens = 1 - ellipticity_values
-    phi_gamma = np.random.uniform(0, 2 * np.pi, size=size)
-
+    z_l = np.zeros(size)
+    sigma_values = np.zeros(size)
+    einstein_radius_values = np.zeros(size)
+    ellipticity_values = np.zeros(size)
+    shear_values = np.zeros(size)
+    source_x, source_y = np.zeros(size), np.zeros(size)
+    phi_lens, phi_gamma = np.zeros(size), np.zeros(size)
+    q_lens = np.zeros(size)
     Lensed = np.zeros(size)
     imno = np.zeros(size)
     mu_total = np.zeros(size)
     td_max = np.zeros(size)
     mu_1, mu_2, mu_3, mu_4 = np.zeros(size), np.zeros(size), np.zeros(size), np.zeros(size)
     dt_1, dt_2, dt_3, dt_4 = np.zeros(size), np.zeros(size), np.zeros(size), np.zeros(size)
-    x_image, y_image = [], []
-    for i in range(size):
-        Lensed[i], imno[i], x_image_, y_image_, mu_total[i], td_max[i], mu_1[i], mu_2[i], mu_3[i], mu_4[i], dt_1[i], \
-        dt_2[i], dt_3[i], dt_4[i] = check_lensing(z_l[i], z_s[i], cosmo, einstein_radius_values[i], shear_values[i],
-                                                  source_x[i],
-                                                  source_y[i], phi_lens[i], q_lens[i], phi_gamma[i])
-        x_image.append(x_image_)
-        y_image.append(y_image_)
+    x_image, y_image = [[] for _ in range(size)], [[] for _ in range(size)]
+
+    while sum(Lensed == 1) < size:
+        indeces_nolensing = np.where(Lensed == 0)[0]
+        for ind in indeces_nolensing:
+            while True:
+                # Ensure z_l is always smaller than z_s
+                # Sample z_l until it satisfies the condition
+                z_l[ind] = np.random.choice(z_l_values, p=pzl_values / np.sum(pzl_values))
+                if z_l[ind] < z_s[ind]:
+                    break
+        sigma_values[indeces_nolensing] = np.random.choice(sigma_values_, size=len(indeces_nolensing),
+                                                           p=sigma_pdf / np.sum(sigma_pdf))
+
+        # Sample parameters for Einstein radius calculation
+        einstein_radius_values[indeces_nolensing] = einstein_radius(z_l[indeces_nolensing], z_s[indeces_nolensing],
+                                                                    sigma_values[indeces_nolensing])
+
+        # Sample parameters for ellipticity distribution
+
+        for ind in indeces_nolensing:
+            ellipticity_values_, ellipticity_pdf = ellipticity_dispersion_dependent_distr(sigma_values[ind])
+            ellipticity_values[ind] = float(np.random.choice(ellipticity_values_, size=1, p=ellipticity_pdf))
+
+        shear_values[indeces_nolensing] = np.random.choice(shear_values_, size=len(indeces_nolensing), p=shear_pdf)
+
+        # Sample supernova positions
+        source_x[indeces_nolensing], source_y[indeces_nolensing] = supernova_positions(
+            einstein_radius_values[indeces_nolensing], size=len(indeces_nolensing))
+
+        phi_lens[indeces_nolensing] = np.random.uniform(0, 2 * np.pi, size=len(indeces_nolensing))
+        q_lens[indeces_nolensing] = 1 - ellipticity_values[indeces_nolensing]
+        phi_gamma[indeces_nolensing] = np.random.uniform(0, 2 * np.pi, size=len(indeces_nolensing))
+
+        for ind in indeces_nolensing:
+            Lensed[ind], imno[ind], x_image[ind], y_image[ind], mu_total[ind], td_max[ind], mu_1[ind], mu_2[ind], mu_3[
+                ind], mu_4[ind], dt_1[ind], \
+            dt_2[ind], dt_3[ind], dt_4[ind] = check_lensing(z_l[ind], z_s[ind], cosmo, einstein_radius_values[ind],
+                                                            shear_values[ind],
+                                                            source_x[ind],
+                                                            source_y[ind], phi_lens[ind], q_lens[ind], phi_gamma[ind])
 
     return {
         'z': z_s,

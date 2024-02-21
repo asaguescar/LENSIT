@@ -56,13 +56,13 @@ def comoving_rate(z, Rloc=3e4, az=1, omega_sky=4*np.pi):
 
 def add_weight_fromuniformz(z, zmax=1.5, Rloc = 2.35e4, alpha= 1., fraction_sky=.75):
 
-    x_cor = np.linspace(0, zmax+0.1, 10000)
+    x_cor = np.linspace(0, zmax+0.1, 100)
     y_cor = np.diff(comoving_rate(x_cor, Rloc=Rloc, az=alpha))
     f_cor = interp1d(np.mean([x_cor[1:], x_cor[:-1]], axis=0), y_cor)
 
     all_sky_rate = (float(comoving_rate([zmax], Rloc=Rloc, az=alpha)) -  float(comoving_rate([0.1], Rloc=Rloc, az=alpha)) )* fraction_sky
 
-    hist, bin_edges = np.histogram(z, bins=20)
+    hist, bin_edges = np.histogram(z, bins=100)
     bin_indices = np.digitize(z, bin_edges[:-1])  # Use digitize to get bin indices for each data point
     weights_mapped_to_data = hist[bin_indices - 1]
 

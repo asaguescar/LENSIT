@@ -1,8 +1,7 @@
 import sncosmo
 import numpy as np
 from skysurvey import target
-from simulations.ztf_sims import rate_glIa, zlens_from_pdf, random_mutotal, inmo_dt_dist, redshift_Ia_DG, dts_dist, mus_dist, x1_pdf, c_pdf, magabs_Ia, magabs_magnified, fromsfdmaps, hostdust_Ia, rate_glCC, magabs_IIP, rate_Ia, sample_from_DG, zs_from_DG
-import pandas as pd
+from src.simulations.ztf_sims import rate_glIa, zlens_from_pdf, random_mutotal, inmo_dt_dist, redshift_Ia_DG, dts_dist, mus_dist, x1_pdf, c_pdf, magabs_Ia, magabs_magnified, fromsfdmaps, hostdust_Ia, rate_glCC, magabs_IIP, rate_Ia, sample_from_DG, zs_from_DG
 from astropy.cosmology import Planck18
 from skysurvey.tools import utils
 

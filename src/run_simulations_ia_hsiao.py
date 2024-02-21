@@ -18,11 +18,11 @@ size  = args.size
 i     = args.index
 ##############################
 
-from simulations.simulating_lenses import sample_object_parameters
+from simulations.simulating_lenses import sample_lensing_parameters
 from astropy.cosmology import Planck18 as cosmo
 import pandas as pd
 
-out = sample_object_parameters(z_max=z_max, cosmo=cosmo, size=size)
+out = sample_lensing_parameters(z_max=z_max, cosmo=cosmo, size=size)
 outdf = pd.DataFrame(out)
 outlensed = outdf[outdf.Lensed == 1]
 del out

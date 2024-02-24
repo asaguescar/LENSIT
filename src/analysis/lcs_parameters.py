@@ -126,46 +126,58 @@ def get_lcs_params(times_, mags_, magerrs_, bands_, snr_, doPlot=False, survey_b
                 plt.figure()
                 plt.errorbar(t, m, yerr=merr, fmt='o', color='b', label='Experimental Data')
 
-            if len(t) > 3:  # If more than 3 points we do polynomial fit
-                params, covariance = curve_fit(quadratic, t, m, sigma=merr)
-                polynomial = np.poly1d(params)
-                y_fit = polynomial(x_range)
-                if doSpline:
-                    ff = interp1d(t, m, bounds_error=False)  # magnitude function at any epoch
-                else:
-                    ff = interp1d(x_range, y_fit, bounds_error=False)  # magnitude function at any epoch
+            try:
+                if len(t) > 3:  # If more than 3 points we do polynomial fit
+                    params, covariance = curve_fit(quadratic, t, m, sigma=merr)
+                    polynomial = np.poly1d(params)
+                    y_fit = polynomial(x_range)
+                    if doSpline:
+                        ff = interp1d(t, m, bounds_error=False)  # magnitude function at any epoch
+                    else:
+                        ff = interp1d(x_range, y_fit, bounds_error=False)  # magnitude function at any epoch
 
-                params, covariance = curve_fit(quadratic, t, m + merr, sigma=merr)
-                polynomial = np.poly1d(params)
-                if doSpline:
-                    ff_up = interp1d(t, m + merr, bounds_error=False)
-                    y_fit_upp = ff_up(x_range)
+                    params, covariance = curve_fit(quadratic, t, m + merr, sigma=merr)
+                    polynomial = np.poly1d(params)
+                    if doSpline:
+                        ff_up = interp1d(t, m + merr, bounds_error=False)
+                        y_fit_upp = ff_up(x_range)
+                    else:
+                        y_fit_upp = polynomial(x_range)
+                    params, covariance = curve_fit(quadratic, t, m - merr, sigma=merr)
+                    polynomial = np.poly1d(params)
+                    if doSpline:
+                        ff_low = interp1d(t, m - merr, bounds_error=False)
+                        y_fit_low = ff_low(x_range)
+                    else:
+                        y_fit_low = polynomial(x_range)
+                    y_fit = np.array([np.max([y_fit_upp[i], y_fit_low[i]]) - np.min([y_fit_upp[i], y_fit_low[i]]) for i in
+                                      range(len(x_range))])
+                    ffmerr = interp1d(x_range, y_fit / 2, bounds_error=False)  # Funcction for magnitude errors
+                    if doPlot:
+                        plt.plot(x_range, y_fit_upp, '--', label='Upp bound')
+                        plt.plot(x_range, y_fit_low, ':', label='Low bound')
+                        plt.plot(x_range, ff(x_range), 'r-', label='Fit')
+                elif len(t) > 1:
+                    ff = interp1d(t, m, bounds_error=False)
+                    ffmerr = interp1d(t, merr, bounds_error=False)
+                    if doPlot:
+                        plt.plot(x_range, ff(x_range), 'r-', label='Fit')
+                        plt.plot(x_range, ff(x_range) + ffmerr(x_range), '--', label='Upp bound')
+                        plt.plot(x_range, ff(x_range) - ffmerr(x_range), ':', label='Low bound')
                 else:
-                    y_fit_upp = polynomial(x_range)
-                params, covariance = curve_fit(quadratic, t, m - merr, sigma=merr)
-                polynomial = np.poly1d(params)
-                if doSpline:
-                    ff_low = interp1d(t, m - merr, bounds_error=False)
-                    y_fit_low = ff_low(x_range)
-                else:
-                    y_fit_low = polynomial(x_range)
-                y_fit = np.array([np.max([y_fit_upp[i], y_fit_low[i]]) - np.min([y_fit_upp[i], y_fit_low[i]]) for i in
-                                  range(len(x_range))])
-                ffmerr = interp1d(x_range, y_fit / 2, bounds_error=False)  # Funcction for magnitude errors
-                if doPlot:
-                    plt.plot(x_range, y_fit_upp, '--', label='Upp bound')
-                    plt.plot(x_range, y_fit_low, ':', label='Low bound')
-                    plt.plot(x_range, ff(x_range), 'r-', label='Fit')
-            elif len(t) > 1:
-                ff = interp1d(t, m, bounds_error=False)
-                ffmerr = interp1d(t, merr, bounds_error=False)
-                if doPlot:
-                    plt.plot(x_range, ff(x_range), 'r-', label='Fit')
-                    plt.plot(x_range, ff(x_range) + ffmerr(x_range), '--', label='Upp bound')
-                    plt.plot(x_range, ff(x_range) - ffmerr(x_range), ':', label='Low bound')
-            else:
-                ff = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
-                ffmerr = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
+                    ff = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
+                    ffmerr = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
+            except:
+                try:
+                    ff = interp1d(t, m, bounds_error=False)
+                    ffmerr = interp1d(t, merr, bounds_error=False)
+                    if doPlot:
+                        plt.plot(x_range, ff(x_range), 'r-', label='Fit')
+                        plt.plot(x_range, ff(x_range) + ffmerr(x_range), '--', label='Upp bound')
+                        plt.plot(x_range, ff(x_range) - ffmerr(x_range), ':', label='Low bound')
+                except:
+                    ff = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
+                    ffmerr = interp1d([-20, 50], [np.nan, np.nan], bounds_error=False)
 
             m_peak = ff(t_peak)
 

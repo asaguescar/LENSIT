@@ -61,7 +61,11 @@ if os.path.isfile(dset_file[:-4]+'_fittedparams.pkl')==False:
 
         fitted_params_outfile = dset_file[:-4] + '_salt2fit_ind' + str(obs_ind) + '.pkl'
         if os.path.isfile(fitted_params_outfile):
-            out = pd.read_pickle(fitted_params_outfile)
+            try:
+                out = pd.read_pickle(fitted_params_outfile)
+            except:
+                out = lc_salt2_fit(lc, mwebv, zlens, doPlot=False)
+                pickle.dump(out, open(fitted_params_outfile, 'wb'))
         else:
             out = lc_salt2_fit(lc, mwebv, zlens, doPlot=False)
             pickle.dump(out, open(fitted_params_outfile, 'wb'))

@@ -134,7 +134,7 @@ def ellipticity_dispersion_dependent_distr(sigma, A=0.38, B=5.7e-4):
     x = np.linspace(0, 0.8, 1000)
 
     s = A + B * sigma
-    pdf = x / (s ** 2) * np.exp(-x ** 2 / (s ** 2))
+    pdf = x / (s ** 2) * np.exp(-x ** 2 / (2*s ** 2))
 
     # Normalize the PDF
     pdf_normalized = pdf / np.sum(pdf)
@@ -153,7 +153,7 @@ def shear_distr(shear_max=1.5, s=0.05):
     Tuple: Values of shear and corresponding probability density.
     """
     x = np.linspace(0, shear_max, 1000)
-    pdf = x / (s ** 2) * np.exp(-x ** 2 / (s ** 2))
+    pdf = x / (s ** 2) * np.exp(-x ** 2 / (2*s ** 2))
 
     # Normalize the PDF
     pdf_normalized = pdf / np.sum(pdf)
@@ -175,7 +175,7 @@ def supernova_positions(theta_ein, size=None):
     Units:
     - Add information about the units for clarity.
     '''
-    theta_l = 0.9 * theta_ein
+    theta_l = theta_ein
     r = np.random.uniform(0, 1, size=size)
     theta = np.random.uniform(0, 2 * np.pi, size=size)
     x_s = theta_l * np.sqrt(r) * np.cos(theta)

@@ -57,7 +57,7 @@ dset.targets.data['ndet'].loc[det.index] = det
 import pickle
 
 dset_ = {'targets': dset.targets.data,
-         'data': dset.data}
+         'data': dset.data.loc[dset.targets.data[dset.targets.data.ndet>=2].index]}
 del dset
 
 import os

@@ -49,15 +49,12 @@ def pzl(z_max, cosmo):
     pdf_unnormalized_ = pdf_unnormalized(z_l)
     norm_cont = quad(pdf_unnormalized, z_l_min, z_l_max)[0]
     pdf_normalized = pdf_unnormalized_ / norm_cont
-    pdf_pervolume = np.diff(pdf_normalized)
 
-    # Vectorize the operation for better performance
-    z_mean = np.mean([z_l[1:], z_l[:-1]], axis=0)
+    return z_l, pdf_normalized
 
-    return z_mean, pdf_pervolume
+import scipy.special
 
-
-def sigma_distr(phi0=8e-3, sigma0=161, alpha=2.32, beta=2.67):
+def sigma_distr(sv, phi0=8e-3, sigma0=161, alpha=2.32, beta=2.67):
     '''Generate the distribution of velocity dispersion of lens galaxies.
 
     Parameters:
@@ -67,18 +64,13 @@ def sigma_distr(phi0=8e-3, sigma0=161, alpha=2.32, beta=2.67):
     - beta (float): Parameter.
 
     Returns:
-    Tuple: Values of velocity dispersion and corresponding probability density.
+    Tuple:  probability density.
 
     Units:
     - Add information about the units for clarity.
     '''
-    x = np.linspace(0.001, 500, 10000)
-    pdf = phi0 * (x / sigma0) ** alpha * np.exp(-(x / sigma0) ** beta) * beta / scipy.special.gamma(alpha / beta) / x
 
-    # Normalize the PDF
-    pdf_normalized = pdf / np.sum(pdf)
-
-    return x, pdf_normalized
+    return phi0 * (sv/sigma0)**alpha * np.exp(-(sv/sigma0)**beta) * beta / scipy.special.gamma(alpha/beta)#/ sv
 
 
 def einstein_radius(z_l, z_s, sigma):
@@ -258,7 +250,8 @@ def sample_lensing_parameters(z_max=1, cosmo=cosmo, size=None):
     z_l_values, pzl_values = pzl(z_max, cosmo)
 
     # Sample parameters for velocity dispersion distribution
-    sigma_values_, sigma_pdf = sigma_distr()
+    sigma_values_ = np.linspace(50,400, size)
+    sigma_pdf = sigma_distr(sigma_values_)
 
     # Sample parameters for shear distribution
     shear_values_, shear_pdf = shear_distr()

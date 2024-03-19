@@ -19,9 +19,9 @@ import pandas as pd
 outlensed = pd.DataFrame(pd.read_pickle(lensfile))
 
 from astropy.cosmology import Planck18 as cosmo
-from simulations.simulating_sne import glsneia_salt2_sample
+from simulations.simulating_sne import glsneiip_sample
 
-out_ia_salt2 = glsneia_salt2_sample(outlensed.to_dict('list'), cosmo)
+out_ia_salt2 = glsneiip_sample(outlensed.to_dict('list'), cosmo)
 del outlensed
 
 import pandas as pd
@@ -31,7 +31,7 @@ from skysurvey import ztf
 ztf_survey = ztf.ZTF(survey, level='quadrant')
 del survey
 
-from simulations.glsne_target import GLSNeIa_salt2
+from simulations.glsne_target import GLSNe_sn2p_2005lc
 import numpy as np
 
 # Add t0
@@ -41,7 +41,7 @@ out_ia_salt2['t0'] = np.random.uniform(starting_date, ending_date, size=len(out_
 
 ia_salt2 = pd.DataFrame(out_ia_salt2)
 del out_ia_salt2
-sample = GLSNeIa_salt2.from_data(ia_salt2[ia_salt2.Lensed==1])
+sample = GLSNe_sn2p_2005lc.from_data(ia_salt2[ia_salt2.Lensed==1])
 del ia_salt2
 
 from skysurvey import DataSet
@@ -70,6 +70,6 @@ if not isExist:
    os.makedirs(path)
    print("The new directory is created! ", path)
 
-outputfilename = lensfile[:-4]+'_dset_ia_salt2.pkl'
+outputfilename = lensfile[:-4]+'_dset_iip.pkl'
 pickle.dump(dset_, open(outputfilename, 'wb'))
 print('Saved: ', outputfilename)

@@ -38,3 +38,12 @@ We add SN parameters.
 
 We run skysurvey with our sample and the ZTF survey.
 
+# Usage documentation 
+
+Here we explain usage, computational time etc.
+
+- Running function `sample_object_parameters(z_max, cosmo, size)` for z_max=1.5 and  size=10000 takes around 18 minutes. To optimize computing time, one can run this function in parallel according to the CPU power to optimize CPU usage time.
+
+- SNe parameters
+
+- Then we run skysurvey

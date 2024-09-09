@@ -12,7 +12,6 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class plotting:
-    
     def corner_plot(self, df, params=['dmag', 'log_td_max', 'log_angsep_max'], 
                     param_labels=[r'$\Delta m$', r'$\log(\Delta t_{max})$', r'$\theta_{max}$'],
                     weights = None, levels=[1-.95,1- .68, 1], 
@@ -20,6 +19,27 @@ class plotting:
                     common_norm=False, aspect=1, despine=True, palette='bright',
                     legend_labels=['Doubles', 'Triplets', 'Quads'],
                     savefigname = ''):
+        """
+        Generate a corner plot for the given DataFrame showcasing relationships between multiple parameters.
+
+        Parameters:
+            df (DataFrame): The data frame containing the data.
+            params (list): List of parameters to plot.
+            param_labels (list): List of labels for the parameters.
+            weights (array, optional): Weights for each point in the plot.
+            levels (list): Contour levels to plot.
+            hue (str): Column name for hue categorization.
+            hue_order (list): Order of hues for categorical distinction.
+            common_norm (bool): Whether to apply a common normalization across facets.
+            aspect (float): Aspect ratio of each facet.
+            despine (bool): Whether to despine the figures of their box frame.
+            palette (str): Color palette to use.
+            legend_labels (list): Labels for the legend.
+            savefigname (str): Path to save the figure file.
+
+        Returns:
+            None
+        """
 
         if hue is not None:
             cols = list(np.concatenate([params, [hue]]))
@@ -83,6 +103,44 @@ class plotting:
             , cmap='bone'
             , app_mag_lens=99
             , ax=None):
+        """
+        Simulate the lensed appearance of an astronomical object as it would appear in ZTF imaging data.
+
+        Parameters:
+            numPix (int): Number of pixels across the image dimension.
+            deltaPix (float): Pixel scale (arcseconds per pixel).
+            exp_time (int): Exposure time in seconds.
+            sigma_bkg (float): Background noise level.
+            fwhm (float): Full-width at half maximum (arcseconds) for the PSF.
+            ellipticity (float): Ellipticity of the lens galaxy.
+            theta_ein (float): Einstein radius in arcseconds.
+            gamma (float): External shear strength.
+            z_lens (float): Redshift of the lens.
+            z_source (float): Redshift of the source.
+            zero_point (float): Photometric zero point.
+            limiting_magnitude (float): Limiting magnitude of the survey.
+            sky_brightness (float): Sky brightness in magnitudes per square arcsecond.
+            num_exposures (int): Number of exposures.
+            source_x (float): Source position along x.
+            source_y (float): Source position along y.
+            x_image (list): x-coordinates of images.
+            y_image (list): y-coordinates of images.
+            app_mag (float): Apparent magnitude of the source.
+            macro_mag (list): List of magnification factors for each image.
+            ccd_gain (float): CCD gain (electrons per count).
+            read_noise (float): Read noise (electrons).
+            psf_type (str): Type of PSF model.
+            truncation (float): Truncation radius for the PSF.
+            cosmo: Cosmology used for distance calculations.
+            savefig (bool): If True, save the figure.
+            filename (str): Filename to save the figure.
+            cmap (str): Colormap for the image.
+            app_mag_lens (float): Apparent magnitude of the lens galaxy.
+            ax (matplotlib axis): Axis to plot on, if provided.
+
+        Returns:
+            None
+        """
         import matplotlib.pyplot as plt
         import lenstronomy.Util.simulation_util as sim_util
         from lenstronomy.ImSim.image_model import ImageModel
@@ -184,6 +242,16 @@ class plotting:
 
 
 def funcmax(df, i):
+    """
+    Calculate the maximum separation between images in a lens system.
+
+    Parameters:
+        df (DataFrame): DataFrame containing x and y image positions.
+        i (int): Index of the lens system in the DataFrame.
+
+    Returns:
+        float: Maximum separation between any two images in arcseconds.
+    """
     xs = df['x_image'].values[i]
     ys = df['y_image'].values[i]
     d = []
@@ -194,6 +262,21 @@ def funcmax(df, i):
 
 
 def get_detections_around_peak(t_peak, time, mags, magerr, bands, snr, snr_threshold=5.):
+    """
+    Identify detections around the peak brightness within a specified range in time and binned per day.
+
+    Parameters:
+        t_peak (float): Time of peak brightness.
+        time (array): Array of times for observations.
+        mags (array): Magnitudes corresponding to the times.
+        magerr (array): Errors associated with the magnitudes.
+        bands (array): Bands in which the observations were made.
+        snr (array): Signal-to-noise ratios of the observations.
+        snr_threshold (float): Threshold for considering detections based on SNR.
+
+    Returns:
+        dict: A dictionary with keys as band names and values as the number of points around the peak.
+    """
     out = {}
     for bb in np.unique(bands):
         mask = (snr>snr_threshold)&(bands==bb)
@@ -207,14 +290,17 @@ def get_detections_around_peak(t_peak, time, mags, magerr, bands, snr, snr_thres
         out[bb + '_npoints_aroundpeak'] = np.array(sum(mask_peak))
         
     return out
-
-
-
-
+    
 def event_rate_ia(z):
-    '''
-    Rloc (Gpc-3) is the local event rate and αz parametrizes the red- shift evolution
-    '''
+    """
+    Calculate the intrinsic event rate of Type Ia supernovae based on redshift, incorporating evolution and decay terms.
+
+    Parameters:
+        z (array): Array of redshifts.
+
+    Returns:
+        array: Calculated event rates for the given redshifts in Gpc-3
+    """
     try:
         rate = np.zeros(len(z))
         rate[z<1] = 2.35e4 * (1+z[z<1])**1.5
@@ -223,12 +309,18 @@ def event_rate_ia(z):
         if z<1: rate = 2.35e4 * (1+z)**1.5
         elif z>=1: rate = 2.35e4 * (1+1)**1.5 / (1+1)**(-0.5) * (1+z)**(-0.5)  
     return rate
-
     
 def comoving_rate_ia(z, omega_sky=4*np.pi):
-    '''Rsl(< zmax)
-    omega_sky : sky area of the survey'''
+    """
+    Calculate the comoving rate of events across the sky up to a given redshift. Rsl(< zmax)
 
+    Parameters:
+        z (array): Array of redshifts to calculate up to.
+        omega_sky (float): Total sky area covered by the survey in steradians.
+
+    Returns:
+        array: Comoving rates integrated up to each redshift.
+    """
     from src.lenses import LensGalaxy
     lens = LensGalaxy()
     def integral_function(z):
@@ -236,6 +328,19 @@ def comoving_rate_ia(z, omega_sky=4*np.pi):
     return omega_sky * np.array([quad(integral_function, 0, zmax)[0] for zmax in z])
 
 def add_weight_ia(z, theta_ein, zmax=2, Rloc = 2.35e4, alpha= 1.):
+    """
+    Assign weights to different redshifts based on their lensing probabilities and volume elements.
+
+    Parameters:
+        z (array): Array of redshifts.
+        theta_ein (float): Einstein radius in radians.
+        zmax (float): Maximum redshift considered.
+        Rloc (float): Local density rate.
+        alpha (float): Scaling exponent for the rate density.
+
+    Returns:
+        array: Weighted values for each redshift interval.
+    """
     weight = theta_ein**2
 
     z_bins = np.arange(.1, np.max(z)+.1, 0.01)
@@ -250,7 +355,16 @@ def add_weight_ia(z, theta_ein, zmax=2, Rloc = 2.35e4, alpha= 1.):
 
 
 def Rcc(z, k = 0.01, A=0.015, B=1.5, C=5.0, D=6.1):
-    '''from Strolger et al 2015'''
+    """
+    Calculate the cosmic core-collapse supernova rate using parameters from Strolger et al. 2015.
+
+    Parameters:
+        z (array): Array of redshifts.
+        k, A, B, C, D (float): Parameters defining the rate evolution.
+
+    Returns:
+        array: Rates of core-collapse supernovae per redshift.
+    """
     phi = A * (1+z)**C /( ((1+z)/B)**D + 1)
     R = k* phi
     R0 = k* A * (1)**C /( ((1)/B)**D + 1)
@@ -258,7 +372,16 @@ def Rcc(z, k = 0.01, A=0.015, B=1.5, C=5.0, D=6.1):
     return R / R0 * R0_Perley
 
 def Rcc_MD(z, k = 0.0068, A=0.015, B=2.9, C=2.7, D=5.6):
-    '''from Madau and Dickinson et al 2014'''
+    """
+    Calculate the cosmic core-collapse supernova rate using parameters from Madau and Dickinson et al. 2014.
+
+    Parameters:
+        z (array): Array of redshifts.
+        k, A, B, C, D (float): Parameters defining the rate evolution.
+
+    Returns:
+        array: Rates of core-collapse supernovae per redshift.
+    """
     phi = A * (1+z)**C /( ((1+z)/B)**D + 1)
     R = k* phi
     R0 = k* A * (1)**C /( ((1)/B)**D + 1)
@@ -401,6 +524,23 @@ def obs_peakmag(t_peak, data, bands=['ztfg', 'ztfr', 'ztfi']):
 
     
 def format_skysurvey_outputs(dsets_list, sntype='ia'):
+    """
+    Processes datasets from sky surveys to categorize supernova detection status and computes additional metrics.
+
+    Parameters:
+        dsets_list (list): List of datasets, each containing 'data' and 'targets' as keys.
+        sntype (str): Type of supernova ('ia', 'iip', 'iin', 'ibc') to apply specific weights.
+
+    Returns:
+        dict: Dictionary containing four categories of supernova detection status:
+              - not_observed: Targets not observed.
+              - not_detected: Targets observed but not detected.
+              - detectable: Targets detected with sufficient data points.
+              - identifiable: Detected targets that can be confidently identified as supernovae based on their inferred magnitudes.
+
+    Raises:
+        ValueError: If the supernova type `sntype` is not recognized.
+    """
     not_observed = {'targets': []}
 
     not_detected = {'data': [],
@@ -427,7 +567,7 @@ def format_skysurvey_outputs(dsets_list, sntype='ia'):
         dset_ = pd.read_pickle(dsets_list[i])
         data = dset_['data']
         targets = dset_['targets']
-        targets['weight'] = add_weight(targets.z, targets.theta_ein)/len(dsets_list)
+        targets['weight'] = add_weight(targets.z, targets.theta_ein, zmax=1.5)/len(dsets_list)
         targets['dmag'] = 2.5*np.log10(targets['mu_total'])
         
         #targets['angsep_max'] = [funcmax(targets, i) for i in range(len(targets['z']))]

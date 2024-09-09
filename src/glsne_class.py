@@ -2,17 +2,26 @@ import sncosmo
 import numpy as np
 
 class GLSNe(sncosmo.Source):
-    '''
-    GLSNe is a class for gravitational lensed supernovae models.
-
-    Args:
-        sntype (str): Type of supernova model (default: "salt2").
-        nimages (int): Number of multiple images (default: 2).
-        name (str): Name of the model (optional).
-        versifon (str): Version of the model (optional).
-    '''
+    """
+    A class for simulating gravitational lensed supernovae models using SNCosmo.
+    
+    Attributes:
+        sntype (str): Type of the supernova model, default is 'salt2'.
+        nimages (int): Number of images due to lensing, default is 2.
+        name (str, optional): Name of the model.
+        version (str, optional): Version of the model.
+    """
 
     def __init__(self, sntype="salt2", nimages=2, name=None, version=None):
+        """
+        Initializes the GLSNe model with specified supernova type and lensing images.
+
+        Parameters:
+            sntype (str): Type of supernova model (default: "salt2").
+            nimages (int): Number of lensed images (default: 2).
+            name (str, optional): Name of the model.
+            version (str, optional): Version of the model.
+        """
         self.name = name
         self.version = version
         self._sntype = sntype
@@ -36,18 +45,25 @@ class GLSNe(sncosmo.Source):
         self._source._wave = np.concatenate([extra_wave,self._source._wave])
         
     def minwave(self):
+        """Returns the minimum wavelength of the model."""
         return self._source.minwave()
 
     def maxwave(self):
+        """Returns the maximum wavelength of the model."""
         return self._source.maxwave()
 
     def minphase(self):
+        """Returns the minimum phase of the model."""
         return self._source.minphase()
 
     def maxphase(self):
+        """Returns the maximum phase of the model."""
         return self._source.maxphase()
 
     def update_param(self):
+        """
+        Updates the model parameters from the underlying supernova model if they have changed.
+        """
         param_tmp = list(self._parameters[self._nimages * 2:])
         for n_ in self._source._param_names:
             self._source.set(**{n_: param_tmp.pop(0)})
@@ -55,6 +71,16 @@ class GLSNe(sncosmo.Source):
         self._current_parameters = self._parameters.copy()
 
     def _flux(self, phase, wave):
+        """
+        Calculates the flux for the given phase and wavelength, accounting for lensing effects.
+
+        Parameters:
+            phase (array_like): Phases at which to calculate the flux.
+            wave (array_like): Wavelengths at which to calculate the flux.
+
+        Returns:
+            array_like: Flux values adjusted for lensing magnifications and delays.
+        """
         if np.any(self._current_parameters != self._parameters):
             self.update_param()
 

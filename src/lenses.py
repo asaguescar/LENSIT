@@ -10,30 +10,41 @@ from scipy.integrate import dblquad, quad
 
 
 class LensGalaxy:
+    """
+    A class for simulating lens galaxy properties and calculating the probability of lensing events.
+    """
 
     def pzl_pdf(self, z, cosmo=cosmo):
-        '''The probability of being a lens per redshift.
-        It is derived from the definition of differential comoving volume'''
+        """
+        Calculates the probability of being a lens for given redshifts based on differential comoving volume.
+
+        Parameters:
+        - z (array_like): Array of redshift values.
+        - cosmo (Cosmology): An astropy cosmology instance.
+
+        Returns:
+        - array_like: Probability density function values.
+        """
         Dl = cosmo.angular_diameter_distance(z).value # Angular diameter at the lens redshift
         pdf = (1 + np.array(z)) ** 2 * Dl ** 2 / cosmo.efunc(z)
         return pdf
 
 
     def sigma_pdf(self, sv, phi0=2.099, sigma0=113.78, alpha=0.94, beta=1.85):
-        '''Generate the distribution of velocity dispersion of lens galaxies.
+        """
+        Generates the probability density function for the velocity dispersion of lens galaxies using
+        the model parameters from Bernardi 2010.
 
-        Parameters: default from Bernardi 2010 https://arxiv.org/pdf/0910.1093.pdf
-        - phi0 (float): Parameter (# h^3 Mpc^-3).
-        - sigma0 (float): Parameter (km s^-1).
-        - alpha (float): Parameter.
-        - beta (float): Parameter.
+        Parameters:
+        - sv (array_like): Array of velocity dispersions.
+        - phi0 (float): Normalization constant (# h^3 Mpc^-3).
+        - sigma0 (float): Characteristic velocity dispersion (km s^-1).
+        - alpha (float): Power-law slope.
+        - beta (float): Exponential cutoff steepness.
 
         Returns:
-        Tuple:  probability density.
-
-        Units:
-        - Add information about the units for clarity.
-        '''
+        - array_like: Probability density function values.
+        """
         sv = np.array(sv)
         pdf = phi0 * (sv / sigma0) ** alpha * np.exp(-(sv / sigma0) ** beta) * beta / scipy.special.gamma(
             alpha / beta)
@@ -41,13 +52,14 @@ class LensGalaxy:
 
     def shear_pdf(self, gamma, s=0.05):
         """
-        Generate the shear distribution.
+        Generates the probability density function of shear values.
 
         Parameters:
-        - shear_max (float): Maximum shear value.
+        - gamma (array_like): Array of shear values.
+        - s (float): Dispersion of the shear values.
 
         Returns:
-        Tuple: Values of shear and corresponding probability density.
+        - array_like: Probability density function values.
         """
         gamma = np.array(gamma)
         pdf = gamma / (s ** 2) * np.exp(-gamma ** 2 / (2*s ** 2))
@@ -55,26 +67,36 @@ class LensGalaxy:
         return pdf
 
     def ellipticity_pdf(self, e, sigma, A=0.38, B=5.7e-4):
-        '''follow Collett ( 2015 )'''
+        """
+        Generates the probability density function for ellipticity based on lens velocity dispersion.
+
+        Parameters:
+        - e (array_like): Array of ellipticity values.
+        - sigma (float): Velocity dispersion used to calculate scale parameter.
+        - A (float): Scale parameter for the base ellipticity distribution.
+        - B (float): Scale factor for dependency on velocity dispersion.
+
+        Returns:
+        - array_like: Probability density function values.
+
+        Reference: Collett 2015
+        """
         e = np.array(e)
         s = A + B * sigma
         pdf = e / (s ** 2) * np.exp(-e ** 2 / (2 * s ** 2))
         return pdf
 
     def supernova_positions(self, theta_ein, size=None):
-        '''
-        Generate random positions for supernovae with respect to the center of the lens galaxy.
+        """
+        Generates random positions for supernovae around the lens galaxy center.
 
         Parameters:
-        - theta_ein (float): Einstein radius (in radians).
-        - size (int): Number of samples to generate (default is None).
+        - theta_ein (float): Einstein radius in radians.
+        - size (int, optional): Number of position samples to generate (default is None).
 
         Returns:
-        Tuple: x and y positions of the supernovae.
-
-        Units:
-        - Add information about the units for clarity.
-        '''
+        - tuple: Arrays of x and y positions.
+        """
         theta_l = theta_ein
         r = np.random.uniform(0, 1, size=size)
         theta = np.random.uniform(0, 2 * np.pi, size=size)
@@ -84,15 +106,15 @@ class LensGalaxy:
 
     def einstein_radius(self, z_l, z_s, sigma):
         """
-        Calculate the Einstein radius (θ_E) given the velocity dispersion and the distances.
+        Calculates the Einstein radius given the lens and source redshifts and the lens velocity dispersion.
 
         Parameters:
         - z_l (float): Redshift of the lens.
         - z_s (float): Redshift of the source.
-        - sigma (float): Velocity dispersion (in km s^-1).
+        - sigma (float): Velocity dispersion of the lens (km s^-1).
 
         Returns:
-        - einstein_radius (float): The Einstein radius (in arcsecond).
+        - float: Einstein radius in arcseconds.
         """
         # Convert velocity dispersion to m/s
         sigma_m = sigma * 1e3
@@ -113,6 +135,16 @@ class LensGalaxy:
         return einstein_radius
 
     def sample(self, z_max=2, size=None):
+        """
+        Samples lens properties such as redshift, velocity dispersion, shear, and ellipticity.
+
+        Parameters:
+        - z_max (float): Maximum redshift for sampling.
+        - size (int, optional): Number of samples (default is None).
+
+        Returns:
+        - dict: Dictionary containing sampled lens properties.
+        """
 
         x = np.linspace(0, z_max, 1000)
         pdf = self.pzl_pdf(x)
@@ -141,7 +173,21 @@ class LensGalaxy:
                 }
 
     def lenstronomy(self, zlens, zsource, phi_lens, ellipticity, phi_gamma, gamma, theta_ein, source_x, source_y, cosmo=cosmo, mu_total_min=2):
+        """
+        Simulates the lensing effect including multiple images and checks for total magnification.
 
+        Parameters:
+        - zlens, zsource: Redshifts of the lens and the source.
+        - phi_lens, phi_gamma: Angular positions of the lens and external shear.
+        - ellipticity, gamma: Ellipticity of the lens and shear.
+        - theta_ein: Einstein radius.
+        - source_x, source_y: Positions of the source.
+        - cosmo: Cosmology used for the simulation.
+        - mu_total_min (float): Minimum total magnification.
+
+        Returns:
+        - tuple: Contains lensing boolean, number of images, image positions, total magnification, and time delays.
+        """
         # Modelling of the lens galaxies SIE + External SHEAR
         lens_model_list = ['SIE', 'SHEAR']
 
@@ -207,6 +253,17 @@ class LensGalaxy:
 
 
     def sample_lensed_zs(self, zsource=2, size=None, mu_total_min=2):
+        """
+        Samples lensed positions based on source redshift and minimum total magnification.
+
+        Parameters:
+        - zsource (float): Redshift of the source.
+        - size (int, optional): Number of samples.
+        - mu_total_min (float): Minimum total magnification.
+
+        Returns:
+        - dict: Lensed positions and properties.
+        """
         lenses = self.sample(z_max=zsource, size=size)
         lenses['theta_ein'] = self.einstein_radius(lenses['zlens'], zsource, lenses['sigma'])
         lenses['source_x'], lenses['source_y'] = self.supernova_positions(lenses['theta_ein'], size=size)
@@ -284,7 +341,18 @@ class LensGalaxy:
 
     
     def ASL(self, z_l, z_s, sigma, lensmodel='SIE'):
-        '''lensing cross-section'''
+        """
+        Calculates the lensing cross-section area for a given lens model.
+
+        Parameters:
+        - z_l (float): Redshift of the lens.
+        - z_s (float): Redshift of the source.
+        - sigma (float): Velocity dispersion of the lens (km s^-1).
+        - lensmodel (str): Lens model type, default is 'SIE' (Singular Isothermal Ellipsoid).
+
+        Returns:
+        - float: Lensing cross-section in square arcseconds.
+        """
         if lensmodel == 'SIE':
             theta_ein = self.einstein_radius(z_l, z_s, sigma) 
             theta_ein_rad = theta_ein * np.pi / (180 * 3600)
@@ -292,7 +360,16 @@ class LensGalaxy:
 
     
     def Psl(self, zs, B=1):
-        '''Here we add the lensing probability for each combination'''
+        """
+        Calculates the lensing probability for a range of source redshifts.
+
+        Parameters:
+        - zs (float): Source redshift.
+        - B (float): Bias factor, default is 1.
+
+        Returns:
+        - float: Integrated lensing probability over the source redshift.
+        """
         int_sigma = quad(self.sigma_pdf, 0, np.inf)[0]
 
         def ASL(z_l, z_s, sigma, lensmodel='SIE'):
@@ -309,6 +386,18 @@ class LensGalaxy:
         return dblquad(integral_db, 0, np.inf, 0, zs)[0]
 
     def dif_Psl(self, zs, z_l, sigma, B=1):
+        """
+        Calculates differential lensing probability for a given lens redshift and velocity dispersion.
+
+        Parameters:
+        - zs (float): Source redshift array.
+        - z_l (float): Lens redshift.
+        - sigma (float): Velocity dispersion of the lens (km s^-1).
+        - B (float): Bias factor, default is 1.
+
+        Returns:
+        - float: Differential lensing probability.
+        """
         int_sigma = quad(lens.sigma_pdf, 0, np.inf)[0]
 
         def ASL(z_l, z_s, sigma, lensmodel='SIE'):
@@ -325,31 +414,47 @@ class LensGalaxy:
         return integral_db(z_l, sigma)
 
     def psl_simpl(self, z_s, B=1):
-        '''PDF of strong lensing per redshift
+        """
+        Provides a simplified probability density function of strong lensing per source redshift.
 
         Parameters:
-        - z_s (float): Redshift value.
-        - B (float): Optional parameter (default is 1).
+        - z_s (float): Source redshift.
+        - B (float): Bias factor, default is 1.
 
         Returns:
-        float: Probability density function value.
-
-        Units:
-        - Add information about the units for clarity.
-        '''
+        - float: Simplified lensing probability density.
+        """
         z_s_term = 1 + 0.41 * z_s ** 1.1
         result = (5e-4 * z_s ** 3) / z_s_term ** 2.7
 
         return result
 
     def sample_uniform_zs(self, z_min=0.1, z_max=2.0, size = 1000, mu_total_min=2):
+        """
+        Samples uniform redshifts and generates lensing events based on those redshifts.
+
+        Parameters:
+        - z_min (float): Minimum redshift value.
+        - z_max (float): Maximum redshift value.
+        - size (int): Number of redshifts to sample.
+        - mu_total_min (float): Minimum total magnification for lensing to be considered significant.
+
+        Returns:
+        - DataFrame: Dataframe containing the properties of lensed events.
+        """
         zs = np.random.uniform(z_min, z_max, size=size)
 
         dflenses = []
         for i in tqdm(range(len(zs))):
             # print(zs[i])
-            lenses = self.sample_lensed_zs(zsource=zs[i], size=1,
+            lenses = self.sample_lensed_zs(zsource=zs[i], size=1, 
                                            mu_total_min=mu_total_min)  # Returns strongly lensed events: at lleast 2 images and minimum total magnification 2.
             df = pd.DataFrame(lenses)
             dflenses.append(df)
         return  pd.concat(dflenses, ignore_index=True)
+
+
+
+
+
+    
